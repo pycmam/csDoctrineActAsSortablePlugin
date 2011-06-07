@@ -172,7 +172,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     // Position is required to be unique. Blanks it out before it moves others up/down.
     $object->set($this->_options['name'], null);
-		$object->save();
+	$object->save();
 
 
     if ($position > $newPosition)
@@ -184,16 +184,16 @@ class Doctrine_Template_Sortable extends Doctrine_Template
                               ->andWhere($this->_options['name'] . ' >= ?', $newPosition)
                               ->orderBy($this->_options['name'] . ' DESC');
 
+      $ra = $q->getRootAlias();
       foreach ($this->_options['uniqueBy'] as $field)
       {
-        $q->addWhere($field . ' = ?', $object[$field]);
+        $q->addWhere("$ra.$field = ?", $object[$field]);
       }
 
       $q->execute();
     }
     elseif ($position < $newPosition)
     {
-
       $q = $object->getTable()->createQuery()
                               ->update(get_class($object))
                               ->set($this->_options['name'], $this->_options['name'] . ' - 1')
@@ -201,16 +201,17 @@ class Doctrine_Template_Sortable extends Doctrine_Template
                               ->andWhere($this->_options['name'] . ' <= ?', $newPosition)
                               ->orderBy($this->_options['name'] . ' ASC');
 
+      $ra = $q->getRootAlias();
       foreach($this->_options['uniqueBy'] as $field)
       {
-        $q->addWhere($field . ' = ?', $object[$field]);
+        $q->addWhere("$ra.$field = ?", $object[$field]);
       }
 
       $q->execute();
     }
 
     $object->set($this->_options['name'], $newPosition);
-		$object->save();
+	$object->save();
 
     // Commit Transaction
     $connection->commit();
@@ -356,21 +357,22 @@ class Doctrine_Template_Sortable extends Doctrine_Template
                             ->select($this->_options['name'])
                             ->orderBy($this->_options['name'] . ' desc');
 
-   foreach($this->_options['uniqueBy'] as $field)
-   {
-     if(is_object($object[$field]))
-     {
-       $q->addWhere($field . ' = ?', $object[$field]['id']);
-     }
-     else
-     {
-       $q->addWhere($field . ' = ?', $object[$field]);
-     }
-   }
+    foreach($this->_options['uniqueBy'] as $field)
+    {
+      $ra = $q->getRootAlias();
+      if(is_object($object[$field]))
+      {
+        $q->addWhere("$ra.$field = ?", $object[$field]['id']);
+      }
+      else
+      {
+        $q->addWhere("$ra.$field = ?", $object[$field]);
+      }
+    }
 
-   $last = $q->limit(1)->fetchOne();
-   $finalPosition = $last ? $last->get($this->_options['name']) : 0;
+    $last = $q->limit(1)->fetchOne();
+    $finalPosition = $last ? $last->get($this->_options['name']) : 0;
 
-   return (int)$finalPosition;
+    return (int) $finalPosition;
   }
 }
