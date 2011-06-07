@@ -7,7 +7,7 @@ class csSortableActions extends sfActions
      */
     protected function redirectToIndex()
     {
-        $this->redirect(sprintf('%s/%s', $this->moduleName, $this->actionName));
+        $this->redirect(sprintf('%s/index', $this->moduleName));
     }
 
     /**
@@ -17,6 +17,7 @@ class csSortableActions extends sfActions
     {
         $object = $this->getRoute()->getObject();
         $object->promote();
+        $object->save();
         $this->redirectToIndex();
     }
 
@@ -27,6 +28,7 @@ class csSortableActions extends sfActions
     {
         $object = $this->getRoute()->getObject();
         $object->demote();
+        $object->save();
         $this->redirectToIndex();
     }
 
@@ -37,6 +39,7 @@ class csSortableActions extends sfActions
     {
         $object = $this->getRoute()->getObject();
         $object->moveToFirst();
+        $object->save();
         $this->redirectToIndex();
     }
 
@@ -47,6 +50,7 @@ class csSortableActions extends sfActions
     {
         $object = $this->getRoute()->getObject();
         $object->moveToLast();
+        $object->save();
         $this->redirectToIndex();
     }
 }
